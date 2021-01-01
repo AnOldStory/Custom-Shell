@@ -1,8 +1,7 @@
 #include "global.h"
 
-void emit(int t){
-    int val = getValue(t);
-    switch(t){
+void emit(struct symbol t){
+    switch(t.token){
         /* parser variable */
         case S_SQU   :
         case S_DQU   :
@@ -20,8 +19,19 @@ void emit(int t){
         case S_LTLTLT:
         case S_GTGT  :
         case S_GTGTGT:
-            printf("%s ", symtable[val].lexptr); break;
+            printf("%s ", t.lexptr); break;
+        case S_DONE:
+            break;
+        case S_PROG:
+        case S_PIPE:
+        case S_ARG :
+        case S_OPT :
+        case S_COM :
+        case S_STR :
+        case S_VAR :
+        case S_NUM :
+
         default:
-            printf("%s[%d] ", symtable[val].lexptr, t);
+            printf("%s[%d] ", t.lexptr, t.token);
     }
 }

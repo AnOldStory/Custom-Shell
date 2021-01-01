@@ -1,5 +1,18 @@
 #include "global.h"
 
+struct symbol tokens[]={
+    "T_DONE", S_DONE,
+    "T_PROG", S_PROG,
+    "T_PIPE", S_PIPE,
+    "T_ARG", S_ARG ,
+    "T_OPT", S_OPT ,
+    // "T_COM", S_COM ,
+    // "T_STR", S_STR ,
+    // "T_VAR", S_VAR ,
+    // "T_NUM", S_NUM ,
+    0,    0
+};
+
 struct symbol keywords[]={
     "'",  S_SQU ,
     "\"", S_DQU ,
@@ -22,7 +35,14 @@ struct symbol keywords[]={
 
 void compiler_init(){
     struct symbol *p;
+
+    printf("lexer variable setting \n");
     for (p=keywords; p->token; p++)
         insert(p->lexptr, p->token);
+
+    printf("parser variable setting \n");
+    for (p=tokens; p->token; p++)
+        insert(p->lexptr, p->token);
+    
     printf("init end\n");
 }

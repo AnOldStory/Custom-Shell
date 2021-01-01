@@ -2,7 +2,7 @@
 
 int main(){
     compiler_init();  
-    parse();
-    printf("\n");
+        parse();
+        printf("\n");
     exit(0);
 }

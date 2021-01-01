@@ -44,31 +44,19 @@
 #define S_GTGT    260 /* >> */
 #define S_GTGTGT  261 /* >>> */
 
-/**
- *  stdin = 0 stdout=1 stderr=2
- *  > stdout 
- *  &> both stdout and stderr
- *  >> append
- * 
- *  < file stdin
- *  << multi stdin
- *  <<< string stdin
- * 
- *  | result pass
- * 
- *  ; - 앞의 명령어가 실패해도 다음 명령어가 실행
- *  && - 앞의 명령어가 성공했을 때 다음 명령어가 실행
- *  & - 앞의 명령어를 백그라운드로 돌리고 동시에 뒤의 명령어를 실행
-*/
-
-int tokenval;
-
+/* symbol.c */
 struct symbol {
     char *lexptr;
     int token;
 };
 
-struct symbol symtable[];
+struct symbol symtable[]; /* token */
 
+struct symbol *lexer();
+struct symbol *lookup(char s[],int tok);
+struct symbol *lookup_t(int tok);
+void switcher(struct symbol *s, int t);
+
+/* parser.c */
 
 #endif

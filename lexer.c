@@ -1,14 +1,15 @@
 #include "global.h"
 
-enum STATUS { Normal, isStr, isStr2, isCmd, isAmp, isBar, isLT, isLTLT, isGT, isGTGT, isHash };
+enum STATUS { Normal, isDig, isStr, isStr2, isCmd, isAmp, isBar, isLT, isLTLT, isGT, isGTGT, isHash };
 
 char lexbuf[BSIZE];
 
-int lexer(){
-    enum STATUS state = Normal;
-    enum STATUS prestate = Normal;
 
-    int p,buf = 0;
+enum STATUS state = Normal;
+
+
+struct symbol *lexer(){
+    int tempint,p,buf = 0;
     while(1){
         int token = getchar();
         if (token == S_BSL){ /* ESCAPE */
@@ -43,23 +44,29 @@ int lexer(){
 
 					case ' ' :
 					case '\t':
+                    case '\n':
 						continue;
 
                     case EOF:
-                    case '\n':
-                        return S_DONE;
+                        return lookup_t(S_DONE);
 
                     default:
-                        state = isCmd;
                         ungetc(token,stdin);
+                        if(isdigit(token)){ /* File Discriptor left value */
+                            state = isDig;
+                        } else {
+                            state = isCmd;
+                        }
                         continue;
                 }
+            case isDig:
+                scanf("%d",&tempint);
+                sprintf(lexbuf,"%d",tempint);
+                return lookup(lexbuf,S_NUM);
             case isStr:
                 switch(token){
                     case S_SQU:
-                        p=lookup(lexbuf);
-                        if (p==0) p = insert(lexbuf,S_STR);
-                        return symtable[p].token;
+                        return lookup(lexbuf,S_STR);
                     default:
                         lexbuf[buf]=token;
                         buf++;
@@ -68,9 +75,7 @@ int lexer(){
             case isStr2:
                 switch(token){
                     case S_DQU:
-                        p=lookup(lexbuf);
-                        if (p==0) p = insert(lexbuf,S_STR);
-                        return symtable[p].token;
+                        return lookup(lexbuf,S_STR);
                     default:
                         lexbuf[buf]=token;
                         buf++;
@@ -79,18 +84,18 @@ int lexer(){
             case isAmp:
                 switch(token){
                     case S_AMP:
-                        return S_AND;
+                        return lookup_t(S_AND);
                     default:
                         ungetc(token,stdin);
-                        return S_AMP;
+                        return lookup_t(S_AMP);
                 }
             case isBar:
                 switch(token){
                     case S_BAR:
-                        return S_OR;
+                        return lookup_t(S_OR);
                     default:
                         ungetc(token,stdin);
-                        return S_BAR;
+                        return lookup_t(S_BAR);
                 }
             case isLT:
                 switch(token){
@@ -99,15 +104,15 @@ int lexer(){
                         continue;
                     default:
                         ungetc(token,stdin);
-                        return S_LT;
+                        return lookup_t(S_LT);
                 }
             case isLTLT:
                 switch(token){
                     case S_LT:
-                        return S_LTLTLT;
+                        return lookup_t(S_LTLTLT);
                     default:
                         ungetc(token,stdin);
-                        return S_LTLT;
+                        return lookup_t(S_LTLT);
                 }
             case isGT:
                 switch(token){
@@ -116,21 +121,20 @@ int lexer(){
                         continue;
                     default:
                         ungetc(token,stdin);
-                        return S_GT;
+                        return lookup_t(S_GT);
                 }
             case isGTGT:
                 switch(token){
                     case S_GT:
-                        return S_GTGTGT;
+                        return lookup_t(S_GTGTGT);
                     default:
                         ungetc(token,stdin);
-                        return S_GTGT;
+                        return lookup_t(S_GTGT);
                 }
             case isHash:
                 switch(token){
                     case '\n':
                         ungetc(token,stdin);
-                        return ' ';
                     default:
                         continue;
                 }
@@ -145,9 +149,7 @@ int lexer(){
 					case ' ' :
 					case '\t': 
                         ungetc(token,stdin);
-                        p=lookup(lexbuf);
-                        if (p==0) p = insert(lexbuf,S_STR);
-                        return symtable[p].token;
+                        return lookup(lexbuf,S_STR);
                     default:
                         lexbuf[buf]=token;
                         buf++;
