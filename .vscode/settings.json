@@ -1,6 +1,14 @@
 {
   "editor.formatOnSave": true,
   "files.associations": {
-    "typeinfo": "c"
-  }
+    "typeinfo": "c",
+    "errno.h": "c"
+  },
+  "code-runner.executorMap": {
+    "c": "cd $dir && make clean && make && ./main && make clean",
+    "h": "cd $dir && make clean && make && ./main && make clean"
+  },
+  "code-runner.clearPreviousOutput": false,
+  // "code-runner.preserveFocus": true,
+  "code-runner.runInTerminal": true
 }
