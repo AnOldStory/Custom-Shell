@@ -55,6 +55,6 @@ int main(void)
 }
 
 /**
- * cmd file -arg -arg -arg -arg 
- * 
-*/
+ * cmd file -arg -arg -arg -arg
+ *
+ */

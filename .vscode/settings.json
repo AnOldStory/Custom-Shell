@@ -2,7 +2,12 @@
   "editor.formatOnSave": true,
   "files.associations": {
     "typeinfo": "c",
-    "errno.h": "c"
+    "errno.h": "c",
+    "unistd.h": "c",
+    "global.h": "c",
+    "string.h": "c",
+    "stdio.h": "c",
+    "ctype.h": "c"
   },
   "code-runner.executorMap": {
     "c": "cd $dir && make clean && make && ./main && make clean",
