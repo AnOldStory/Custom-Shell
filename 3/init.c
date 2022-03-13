@@ -1,23 +1,25 @@
 #include "global.h"
 
-char hostname[MAX_HOSTNAME]; /* hostname */
-char username[MAX_USERNAME]; /* username */
-char cwd[MAX_CWD];           /* cwd */
-
-char *init_hostname()
+char *get_hostname()
 {
-    /* hostname */
+    char *hostname;
     if (gethostname(hostname, MAX_HOSTNAME) < 0)
         handleErr("cant get hostname");
-    else if (save_string(hostname) == NULL)
-        handleErr("cant alloc -> hostname ");
+    return save_string(hostname);
 }
 
-char *init_username()
+char *get_username()
 {
-    /* username */
-    if (cuserid(username) == NULL)
+    char username[MAX_USERNAME];
+    if (cuserid(username) == 0)
         handleErr("cant get username");
-    else if (save_string(username) == NULL)
-        handleErr("cant alloc -> username");
+    return save_string(&username);
+}
+
+char *get_cwd(char *cwd)
+{
+    char *cwd;
+    if (getcwd(cwd, MAX_CWD) == NULL)
+        handleErr("cant get cwd");
+    return save_string(cwd);
 }

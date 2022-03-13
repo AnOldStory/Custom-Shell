@@ -1,26 +1,65 @@
 #include "global.h"
 
-char *current_host_name = (char *)NULL;         /* hostname */
-char *current_user_name = (char *)NULL;         /* username */
+char *current_hostname = (char *)NULL;          /* hostname */
+char *current_username = (char *)NULL;          /* username */
 char *current_working_directory = (char *)NULL; /* working directory */
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    /* input */
+    size_t len = MAX_LINE;                                       /* length of line */
+    char *inputBuffer = (char *)malloc(sizeof(char) * MAX_LINE); /* need free */
+
+    /* parsed info */
     char *args[MAX_LINE / 2 + 1]; /* command line arguments */
-    int args_size = 0;            /* argument size for free */
-    int should_run = 1;           /* flag to determine when to exit program */
+    int args_size = 0;            /* arguments size */
 
-
-
-    /**
-     * initialize
-     */
-
-
-
-    /* */
-
-    while (should_run) /* run until flag change */
+    int should_run = 1; /* flag to determine when to exit program */
+    while (should_run)  /* run until flag change */
     {
+        /**
+         * initialize
+         */
+        current_hostname = get_hostname();
+        current_username = get_username();
+        current_working_directory = get_cwd();
+        fflush(stdout);
+
+        printf("%s@%s:~%s$ ", current_hostname, current_username, current_working_directory); /* print username */
+
+        /* PARSER */
+        getline(&inputBuffer, &len, stdin);
+
+        run_parse(inputBuffer, args, &args_size);
+
+        int fds[2];
+        pipe(fds);
+
+        pid_t pid = fork();
+        if (pid > 0)
+        {
+            /* parents */
+        }
+        else if (pid == 0)
+        {
+            /* child */
+            dups(fds[0], STDIN_FILENO);
+            close(fds[0]);
+            clost(fds[1]);
+
+            if (execvp(args[0], args) < 0)
+                exit(0);
+        }
+        else
+        {
+            printf("fork error");
+        }
     }
+}
+
+void free_all()
+{
+    free(current_hostname);
+    free(current_username);
+    free(current_working_directory);
 }

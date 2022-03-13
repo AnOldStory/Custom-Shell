@@ -38,5 +38,9 @@ void f_safe(void *p)
 char *save_string(const char *s)
 {
     // return strcpy((char *)malloc(1 + strlen(s)), s);
+    if (strdup(s) == NULL)
+    {
+        handleErr("cant alloc -> saveString");
+    }
     return strdup(s);
 }

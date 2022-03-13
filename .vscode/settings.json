@@ -7,7 +7,9 @@
     "global.h": "c",
     "string.h": "c",
     "stdio.h": "c",
-    "ctype.h": "c"
+    "ctype.h": "c",
+    "stdlib.h": "c",
+    "JARAM_~1.C": "cpp"
   },
   "code-runner.executorMap": {
     "c": "cd $dir && make clean && make && ./main && make clean",
