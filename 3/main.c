@@ -27,19 +27,17 @@ int main(int argc, char *argv[])
         /**
          * initialize
          */
+        current_username = get_username();
         current_hostname = get_hostname();
-        printf("get hostname %s", get_hostname);
-        // free(*current_hostname);
-        // current_username = get_username();
-        // current_working_directory = get_cwd();
+        current_working_directory = get_cwd();
         fflush(stdout);
 
-        // printf("%s@%s:~%s$ ", current_hostname, current_username, current_working_directory); /* print username */
+        printf("%s@%s:~%s$ ", current_username, current_hostname, current_working_directory); /* print username */
 
         /* PARSER */
         getline(&inputBuffer, &len, stdin);
 
-        // run_parse(inputBuffer, args, &args_size);
+        run_parse(inputBuffer, args, &args_size);
 
         // int fds[2];
         // pipe(fds);

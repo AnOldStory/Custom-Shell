@@ -85,4 +85,8 @@ void run_parse(char *inputBuffer, char *args[], int *args_size);
 struct token *lexer();
 struct token *insert(char s[], int tok);
 
+/* init.c */
+char *get_username();
+char *get_hostname();
+char *get_cwd();
 #endif
