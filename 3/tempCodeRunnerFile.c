@@ -1,0 +1,1 @@
+    printf("%s", save_string(hostname));

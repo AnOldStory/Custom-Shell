@@ -9,13 +9,15 @@
     "stdio.h": "c",
     "ctype.h": "c",
     "stdlib.h": "c",
-    "JARAM_~1.C": "cpp"
   },
   "code-runner.executorMap": {
-    "c": "cd $dir && make clean && make && ./main && make clean",
+    "c": "cd $dir ; make clean ; make ; ./main ; make clean",
     "h": "cd $dir && make clean && make && ./main && make clean"
   },
   "code-runner.clearPreviousOutput": false,
   // "code-runner.preserveFocus": true,
-  "code-runner.runInTerminal": true
+  "code-runner.runInTerminal": true,
+  "code-runner.terminalRoot": "/mnt/",
+  "terminal.integrated.shell.windows": "C:\\Users\\TheSky\\AppData\\Local\\Microsoft\\WindowsApps\\CanonicalGroupLimited.Ubuntu20.04onWindows_79rhkp1fndgsc\\ubuntu2004.exe",
+  "terminal.explorerKind": "integrated",
 }

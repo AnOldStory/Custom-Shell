@@ -9,7 +9,7 @@ void *c_p(size_t num, size_t size)
 {
     void *temp = calloc(num, sizeof(size));
     if (temp == 0)
-        error_c("Memory Allocation failed");
+        error_msg("Memory Allocation failed");
     return temp;
 }
 
@@ -35,12 +35,12 @@ void f_safe(void *p)
     p = NULL;
 }
 
-char *save_string(const char *s)
+char *save_string(char *s)
 {
     // return strcpy((char *)malloc(1 + strlen(s)), s);
-    if (strdup(s) == NULL)
-    {
-        handleErr("cant alloc -> saveString");
-    }
+    // if (strdup(s) == NULL)
+    // {
+    //     handleErr_msg("cant alloc -> saveString");
+    // }
     return strdup(s);
 }

@@ -63,21 +63,26 @@ void *c_p(size_t, size_t);
 void f_tok(struct token);
 void f_arr_c(char *[], int);
 void f_safe(void *);
-char *make_string(const char *);
+char *save_string(char *);
 
 /* error.c */
-void run_i(int);
-void run_c(char *);
-void error_int(int);
-void error_char(char *);
 void handleErr();
-void handleErr(char *msg);
+void handleErr_msg(char *msg);
+void error_int(int);
+void error_msg(char *);
 
 /* parser.c */
-int redoLex(char lexbuf[], int token);
-void skipLex(char lexbuf[]);
-void undoLex(char lexbuf[]);
-struct token parser();
-struct token insert(char s[], int tok);
+void init_buffer(char *init_buffer);
+int get_buffer();
+void put_buffer();
+void run_parse(char *inputBuffer, char *args[], int *args_size);
+
+// int redoLex(char lexbuf[], int token);
+// void skipLex(char lexbuf[]);
+// void undoLex(char lexbuf[]);
+
+/* lexer.c */
+struct token *lexer();
+struct token *insert(char s[], int tok);
 
 #endif

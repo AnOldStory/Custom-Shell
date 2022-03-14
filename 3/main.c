@@ -1,8 +1,15 @@
 #include "global.h"
 
-char *current_hostname = (char *)NULL;          /* hostname */
-char *current_username = (char *)NULL;          /* username */
-char *current_working_directory = (char *)NULL; /* working directory */
+char *current_hostname;          // = (char *)NULL;          /* hostname */
+char *current_username;          // = (char *)NULL;          /* username */
+char *current_working_directory; // = (char *)NULL; /* working directory */
+
+void free_all()
+{
+    free(current_hostname);
+    free(current_username);
+    free(current_working_directory);
+}
 
 int main(int argc, char *argv[])
 {
@@ -21,45 +28,42 @@ int main(int argc, char *argv[])
          * initialize
          */
         current_hostname = get_hostname();
-        current_username = get_username();
-        current_working_directory = get_cwd();
+        printf("get hostname %s", get_hostname);
+        // free(*current_hostname);
+        // current_username = get_username();
+        // current_working_directory = get_cwd();
         fflush(stdout);
 
-        printf("%s@%s:~%s$ ", current_hostname, current_username, current_working_directory); /* print username */
+        // printf("%s@%s:~%s$ ", current_hostname, current_username, current_working_directory); /* print username */
 
         /* PARSER */
         getline(&inputBuffer, &len, stdin);
 
-        run_parse(inputBuffer, args, &args_size);
+        // run_parse(inputBuffer, args, &args_size);
 
-        int fds[2];
-        pipe(fds);
+        // int fds[2];
+        // pipe(fds);
 
-        pid_t pid = fork();
-        if (pid > 0)
-        {
-            /* parents */
-        }
-        else if (pid == 0)
-        {
-            /* child */
-            dups(fds[0], STDIN_FILENO);
-            close(fds[0]);
-            clost(fds[1]);
+        // pid_t pid = fork();
+        // if (pid > 0)
+        // {
+        //     /* parents */
+        //     // dprinf(fds[1],"%s\n")
+        // }
+        // else if (pid == 0)
+        // {
+        //     /* child */
+        //     dups(fds[0], STDIN_FILENO);
+        //     close(fds[0]);
+        //     clost(fds[1]);
 
-            if (execvp(args[0], args) < 0)
-                exit(0);
-        }
-        else
-        {
-            printf("fork error");
-        }
+        //     if (execvp(args[0], args) < 0)
+        //         exit(0);
+        // }
+        // else
+        // {
+        //     printf("fork error");
+        // }
+        free_all();
     }
-}
-
-void free_all()
-{
-    free(current_hostname);
-    free(current_username);
-    free(current_working_directory);
 }
