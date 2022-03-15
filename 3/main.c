@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
         current_hostname = get_hostname();
         current_working_directory = get_cwd();
         fflush(stdout);
+        args_size = 0;
 
         printf("%s@%s:~%s$ ", current_username, current_hostname, current_working_directory); /* print username */
 
@@ -38,6 +39,12 @@ int main(int argc, char *argv[])
         getline(&inputBuffer, &len, stdin);
 
         run_parse(inputBuffer, args, &args_size);
+        // printf("%d asdfasdf", args_size);
+        for (int i = 0; i < args_size; i++)
+        {
+            printf("[%d]%s ", i, args[i]);
+        }
+        printf("\n");
 
         // int fds[2];
         // pipe(fds);
@@ -64,4 +71,6 @@ int main(int argc, char *argv[])
         // }
         free_all();
     }
+    free(inputBuffer);
+    return 0;
 }

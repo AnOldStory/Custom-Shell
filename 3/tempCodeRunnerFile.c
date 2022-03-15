@@ -1,1 +1,1 @@
-    printf("%s", save_string(hostname));
+args_size

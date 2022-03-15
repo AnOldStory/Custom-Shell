@@ -1,29 +1,5 @@
 #include "global.h"
 
-/* table of token */
-#define SYMMAX 100 /* symtable size */
-#define STRMAX 999 /* array lexemes size */
-
-struct token lextable[SYMMAX];
-int lextable_count = 0;
-
-struct token *insert(char *s, int tok)
-{
-    int len = strlen(s);
-    if (len >= STRMAX)
-    {
-        /* evoke error */
-    }
-    if (lextable_count + 1 >= SYMMAX)
-    {
-        /* evoke error */
-    }
-    lextable[lextable_count].lexptr = save_string(s);
-    lextable[lextable_count].type = tok;
-
-    return &lextable[lextable_count++];
-}
-
 enum STATUS
 {
     Normal,
@@ -42,6 +18,31 @@ enum STATUS
 
 enum STATUS state = Normal; /* state manager */
 
+/* table of token */
+#define SYMMAX 100 /* symtable size */
+#define STRMAX 999 /* array lexemes size */
+
+struct token lextable[SYMMAX];
+int lextable_count = 0;
+
+struct token *insert(char *s, int tok)
+{
+    state = Normal;
+    int len = strlen(s);
+    if (len >= STRMAX)
+    {
+        /* evoke error */
+    }
+    if (lextable_count + 1 >= SYMMAX)
+    {
+        /* evoke error */
+    }
+    lextable[lextable_count].lexptr = save_string(s);
+    lextable[lextable_count].type = tok;
+
+    return &lextable[lextable_count++];
+}
+
 #define LEXMAX 100
 char lexbuf[LEXMAX];
 
@@ -56,6 +57,7 @@ struct token *lexer()
             insert(get_buffer(), S_STR);
             buf++;
         }
+        printf("state : %d token : %d\n", state, token);
         switch (state)
         {
         case Normal:
@@ -165,7 +167,7 @@ struct token *lexer()
             switch (token)
             {
             case S_LT:
-                return insert(">>>", S_LTLTLT);
+                return insert("<<<", S_LTLTLT);
             default:
                 put_buffer(token);
                 return insert("<<", S_LTLT);
@@ -209,6 +211,7 @@ struct token *lexer()
             case ' ':
             case '\t':
                 put_buffer(token);
+                state = Normal;
                 lexbuf[buf] = '\0';
                 return insert(save_string(lexbuf), S_STR); // string
             default:
