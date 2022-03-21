@@ -12,6 +12,8 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(MAIN_SOURCE)
 
 .c .o : 
+	rm -f $(OBJECTS)
+	rm -f $(TARGET)
 	$(CC) $(CFLAGS) -c $<
 
 clean:

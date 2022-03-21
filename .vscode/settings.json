@@ -11,7 +11,7 @@
     "stdlib.h": "c",
   },
   "code-runner.executorMap": {
-    "c": "cd $dir ; make clean ; make ; ./main ; make clean",
+    "c": "cd $dir && make clean && make && ./main && make clean",
     "h": "cd $dir && make clean && make && ./main && make clean"
   },
   "code-runner.clearPreviousOutput": false,
