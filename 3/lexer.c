@@ -12,7 +12,6 @@ enum STATUS
     isLT,
     isLTLT,
     isGT,
-    isGTGT,
     isHash
 };
 
@@ -22,11 +21,12 @@ enum STATUS state = Normal; /* state manager */
 #define SYMMAX 100 /* symtable size */
 #define STRMAX 999 /* array lexemes size */
 
-struct token lextable[SYMMAX];
+Token lextable[SYMMAX];
 int lextable_count = 0;
 
-struct token *insert(char *s, int tok)
+Token *insert(char *s, int tok)
 {
+    printf("inserted : %s %d\n", s, tok);
     state = Normal;
     int len = strlen(s);
     if (len >= STRMAX)
@@ -46,18 +46,18 @@ struct token *insert(char *s, int tok)
 #define LEXMAX 100
 char lexbuf[LEXMAX];
 
-struct token *lexer()
+Token *lexer()
 {
     int tempint, p, buf = 0;
     while (1)
     {
         int token = get_buffer();
-        if (token == S_BSL)
-        { /* ESCAPE */
-            insert(get_buffer(), S_STR);
-            buf++;
-        }
-        printf("state : %d token : %d\n", state, token);
+        // if (token == S_BSL)
+        // { /* ESCAPE */
+        //     insert(get_buffer(), S_STR);
+        //     buf++;
+        // }
+        // printf("state : %d token : %d\n", state, token);
         switch (state)
         {
         case Normal:
@@ -160,7 +160,6 @@ struct token *lexer()
                 state = isLTLT;
                 continue;
             default:
-                put_buffer(token);
                 return insert("<", S_LT);
             }
         case isLTLT:
@@ -175,21 +174,15 @@ struct token *lexer()
         case isGT:
             switch (token)
             {
+            case S_BAR:
+                put_buffer(token);
+                return insert(">|", S_GTBAR);
             case S_GT:
-                state = isGTGT;
-                continue;
+                put_buffer(token);
+                return insert(">>", S_GTGT);
             default:
                 put_buffer(token);
                 return insert(">", S_GT);
-            }
-        case isGTGT:
-            switch (token)
-            {
-            case S_GT:
-                return insert(">>>", S_GTGTGT);
-            default:
-                put_buffer(token);
-                return insert(">>", S_GTGT);
             }
         case isHash:
             switch (token)
@@ -211,9 +204,8 @@ struct token *lexer()
             case ' ':
             case '\t':
                 put_buffer(token);
-                state = Normal;
                 lexbuf[buf] = '\0';
-                return insert(save_string(lexbuf), S_STR); // string
+                return insert(lexbuf, S_STR); // string
             default:
                 lexbuf[buf++] = token;
                 continue;

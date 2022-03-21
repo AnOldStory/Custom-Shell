@@ -4,6 +4,7 @@
 #include <stdio.h>     /* standard input output */
 char *cuserid(char *); /* avoid compiler warning  */
 #include <ctype.h>     /* check input type - lexer */
+#include <fcntl.h>     /* open */
 #include <stdlib.h>    /* exit - error, main */
 #include <string.h>    /* strlen - symbol */
 #include <unistd.h>    /* symbol constant */
@@ -33,7 +34,7 @@ int waitpid();         /* avoid compiler warning */
 #define S_VAR 992  /* Variable */
 #define S_NUM 991  /* number */
 
-/* parser variable */
+/* lexer string */
 #define S_SQU 33     /* ' */
 #define S_DQU 34     /* " */
 #define S_HASH 35    /* # */
@@ -49,20 +50,31 @@ int waitpid();         /* avoid compiler warning */
 #define S_LTLT 258   /* << */
 #define S_LTLTLT 259 /* <<< */
 #define S_GTGT 260   /* >> */
-#define S_GTGTGT 261 /* >>> */
+// #define S_GTGTGT 261 /* >>> */
+#define S_GTBAR 262 /* >| */
 
-/* parser.c */
-struct token
+/* lexer.c */
+typedef struct TokenStruct
 {
     char *lexptr;
     int type;
-};
+} Token;
+
+/* parser.c */
+typedef struct FileDescriptorStruct
+{
+    int fd;
+    char *name;
+} FileDescriptor;
+
+typedef struct CommandStruct
+{
+    char **argv;
+    int argc;
+    FileDescriptor file_descriptor[2];
+} Command;
 
 /* string.c */
-void *c_p(size_t, size_t);
-void f_tok(struct token);
-void f_arr_c(char *[], int);
-void f_safe(void *);
 char *save_string(char *);
 
 /* error.c */
@@ -75,15 +87,15 @@ void error_msg(char *);
 void init_buffer(char *init_buffer);
 int get_buffer();
 void put_buffer();
-void run_parse(char *inputBuffer, char *args[], int *args_size);
+Command **run_parse(char *inputBuffer, int *cmd_size); // , char *args[], int *args_size
 
 // int redoLex(char lexbuf[], int token);
 // void skipLex(char lexbuf[]);
 // void undoLex(char lexbuf[]);
 
 /* lexer.c */
-struct token *lexer();
-struct token *insert(char s[], int tok);
+Token *lexer();
+Token *insert(char s[], int tok);
 
 /* init.c */
 char *get_username();
