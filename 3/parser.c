@@ -43,6 +43,8 @@ void put_buffer()
 }
 
 Command *cmd[100];
+char *args[MAX_LINE / 2 + 1]; /* command line arguments */
+int args_size = 0;            /* arguments size */
 
 Command **run_parse(char *inputBuffer, int *cmd_size) // char *args[], int *args_size
 {
@@ -53,8 +55,7 @@ Command **run_parse(char *inputBuffer, int *cmd_size) // char *args[], int *args
     cmd[*cmd_size] = (Command *)malloc(sizeof(Command));
 
     /* parsed info */
-    char *args[MAX_LINE / 2 + 1]; /* command line arguments */
-    int args_size = 0;            /* arguments size */
+    args[args_size] = (char *)malloc(sizeof(char *));
 
     Token token = *lexer(); /* token */
     // args[args_size] = token.lexptr; /* argv first cmd duplicated  */
@@ -66,8 +67,10 @@ Command **run_parse(char *inputBuffer, int *cmd_size) // char *args[], int *args
         {
         case S_DONE:
             args[args_size++] = NULL;
+            args_size = 0;
             cmd[*cmd_size]->argv = args;
             cmd[*cmd_size]->argc = args_size;
+            (*cmd_size)++;
             return cmd;
         /* | */
         case S_BAR:

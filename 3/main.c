@@ -57,77 +57,63 @@ int main(int argc, char *argv[])
         //     }
         // }
 
-        pid_t i = fork();
-        if (i == 0)
+        pid_t parent_pid = fork();
+        if (parent_pid > 0)
         {
-            // printf("-----------------------hello mom\n");
-            if (execvp(cmd[0]->argv[0], cmd[0]->argv) < 0)
+            /* parents */
+            wait();
+        }
+        else if (parent_pid == 0)
+        {
+
+            for (int nth_cmd = 0; nth_cmd < cmd_count; nth_cmd++)
             {
-                handleErr();
+                // pid_t pid = fork();
+                // if (pid == 0)
+                // {
+                int fd_in, fd_out; // read , write
+
+                /* handle stdin to file */
+                if (cmd[nth_cmd]->file_descriptor[0].name != NULL)
+                {
+                    printf("들어가요옷 %s\n", cmd[nth_cmd]->file_descriptor[0].name);
+                    if (fd_in = open(cmd[nth_cmd]->file_descriptor[0].name, cmd[nth_cmd]->file_descriptor[0].fd) < 0)
+                    {
+                        printf("err in fd : %s", cmd[nth_cmd]->file_descriptor[0].name);
+                    }
+                    dup2(fd_in, STDIN_FILENO);
+                    close(fd_in);
+                }
+                /* handle stdout to file*/
+                if (cmd[nth_cmd]->file_descriptor[1].name != NULL)
+                {
+                    printf("나와요옷\n");
+                    if (fd_out = open(cmd[nth_cmd]->file_descriptor[1].name, cmd[nth_cmd]->file_descriptor[1].fd, FILE_PERMISSION) < 0)
+                    {
+                        printf("err in fd : %s", cmd[nth_cmd]->file_descriptor[1].name);
+                    }
+                    dup2(fd_out, STDOUT_FILENO);
+                    close(fd_out);
+                }
+
+                // if (pipe(fd) == -1)
+                // {
+                //     /* pipe error */
+                //     perror("pipe");
+                //     exit(1);
+                // }
+                printf("실행한다잇\n");
+                if (execvp(cmd[nth_cmd]->argv[0], cmd[nth_cmd]->argv) < 0)
+                    exit(1);
+                //     }
+                //     waitpid(pid, NULL, 0);
             }
-            printf("not hello!\n");
         }
         else
         {
-            // printf("---hello son\n");
-            wait(0);
+            printf("fork error");
         }
-
-        // pid_t parent_pid = fork();
-        // if (parent_pid > 0)
-        // {
-        //     /* parents */
-        //     wait();
-        // }
-        // else if (parent_pid == 0)
-        // {
-
-        //     for (int nth_cmd = 0; nth_cmd < cmd_count; nth_cmd++)
-        //     {
-        //         pid_t pid = fork();
-        //         if (pid == 0)
-        //         {
-        //             int fd_in, fd_out; // read , write
-
-        //             /* handle stdin to file */
-        //             // if (cmd[nth_cmd]->file_descriptor[0].name != NULL)
-        //             // {
-        //             //     if (fd_in = open(cmd[nth_cmd]->file_descriptor[0].name, cmd[nth_cmd]->file_descriptor[0].fd) < 0)
-        //             //     {
-        //             //         printf("err in fd : %s", cmd[nth_cmd]->file_descriptor[0].name);
-        //             //     }
-        //             //     dup2(fd_in, STDIN_FILENO);
-        //             //     close(fd_in);
-        //             // }
-        //             // /* handle stdout to file*/
-        //             // if (cmd[nth_cmd]->file_descriptor[1].name != NULL)
-        //             // {
-        //             //     if (fd_out = open(cmd[nth_cmd]->file_descriptor[1].name, cmd[nth_cmd]->file_descriptor[1].fd, FILE_PERMISSION) < 0)
-        //             //     {
-        //             //         printf("err in fd : %s", cmd[nth_cmd]->file_descriptor[1].name);
-        //             //     }
-        //             //     dup2(fd_out, STDOUT_FILENO);
-        //             //     close(fd_out);
-        //             // }
-
-        //             // if (pipe(fd) == -1)
-        //             // {
-        //             //     /* pipe error */
-        //             //     perror("pipe");
-        //             //     exit(1);
-        //             // }
-        //             printf("실행한다잇\n");
-        //             if (execvp(cmd[nth_cmd]->argv[0], cmd[nth_cmd]->argv) < 0)
-        //                 exit(1);
-        //         }
-        //         waitpid(pid, NULL, 0);
-        //     }
-        // }
-        // else
-        // {
-        //     printf("fork error");
-        // }
-        // free_all();
+        free_all();
     }
     free(inputBuffer);
     return 0;
