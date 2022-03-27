@@ -1,17 +1,5 @@
 #include "./global.h"
 
-// int size = 0; /* size of buffer */
-
-// struct token token_list[MAX_TOK]; /* tokens */
-// int lastentry = 0;                /* last token_list */
-
-// enum STATUS /* state list */
-// {
-//     Normal,
-//     Single_Word,
-//     Double_Word
-// };
-
 int buffer_cursor;
 int buffer_size;
 char *buffer;
@@ -26,10 +14,6 @@ void init_buffer(char *init_buffer)
 
 int get_buffer()
 {
-    // printf("%s", buffer);
-    // printf("buffer %c\n ", buffer[buffer_cursor]);
-    // printf("%d %d \n", buffer_cursor, buffer_size);
-    // printf("%c", buffer[buffer_cursor]);
     if (buffer_cursor < buffer_size)
         return buffer[buffer_cursor++];
     else
@@ -42,42 +26,62 @@ void put_buffer()
         buffer_cursor--;
 }
 
-Command *cmd[100];
-char *args[MAX_LINE / 2 + 1]; /* command line arguments */
-int args_size = 0;            /* arguments size */
+Command cmd[100];
 
-Command **run_parse(char *inputBuffer, int *cmd_size) // char *args[], int *args_size
+void run_parse(char *inputBuffer, Command *cmd, int *cmd_size) // char *args[], int *args_size
 {
     init_buffer(inputBuffer);
-
+    // printf("%p,hello\n", cmd);
+    /* init parse */
     int flags = O_CREAT | O_WRONLY;
 
-    cmd[*cmd_size] = (Command *)malloc(sizeof(Command));
+    char **args = (char **)malloc(sizeof(char *) * (MAX_LINE / 2 + 1));
+    int argc = 0; /* arguments size */
 
-    /* parsed info */
-    args[args_size] = (char *)malloc(sizeof(char *));
+    // cmd[*cmd_size] = (Command *)malloc(sizeof(Command));
+
+    cmd[*cmd_size].fd = (FileDescriptor *)malloc(sizeof(FileDescriptor) * 2);
+
+    cmd[*cmd_size].fd[READ_END].flag = 0;
+    cmd[*cmd_size].fd[READ_END].name = NULL;
+
+    cmd[*cmd_size].fd[WRITE_END].flag = 0;
+    cmd[*cmd_size].fd[WRITE_END].name = NULL;
 
     Token token = *lexer(); /* token */
-    // args[args_size] = token.lexptr; /* argv first cmd duplicated  */
-    // args_size++;
 
     while (1)
     {
         switch (token.type)
         {
         case S_DONE:
-            args[args_size++] = NULL;
-            args_size = 0;
-            cmd[*cmd_size]->argv = args;
-            cmd[*cmd_size]->argc = args_size;
+            args[argc] = NULL;
+            cmd[*cmd_size].argv = args;
+            cmd[*cmd_size].argc = argc;
             (*cmd_size)++;
-            return cmd;
+            return;
         /* | */
         case S_BAR:
-            args[args_size] = NULL;
-            cmd[*cmd_size]->argc = args_size;
+            args[argc] = NULL;
+            cmd[*cmd_size].argv = args;
+            cmd[*cmd_size].argc = argc;
             (*cmd_size)++;
-            cmd[*cmd_size] = (Command *)malloc(sizeof(Command));
+
+            /* init parse */
+            flags = O_CREAT | O_WRONLY;
+
+            args = (char **)malloc(sizeof(char *) * (MAX_LINE / 2 + 1));
+            argc = 0; /* arguments size */
+
+            // cmd[*cmd_size] = (Command *)malloc(sizeof(Command));
+
+            cmd[*cmd_size].fd = (FileDescriptor *)malloc(sizeof(FileDescriptor) * 2);
+
+            cmd[*cmd_size].fd[READ_END].flag = 0;
+            cmd[*cmd_size].fd[READ_END].name = NULL;
+
+            cmd[*cmd_size].fd[WRITE_END].flag = 0;
+            cmd[*cmd_size].fd[WRITE_END].name = NULL;
             break;
         /* background */
         case S_AMP:
@@ -86,8 +90,8 @@ Command **run_parse(char *inputBuffer, int *cmd_size) // char *args[], int *args
         /* handle redirection */
         case S_LT:
             // <
-            cmd[*cmd_size]->file_descriptor[0].fd = O_RDONLY;
-            cmd[*cmd_size]->file_descriptor[0].name = lexer()->lexptr;
+            cmd[*cmd_size].fd[READ_END].flag = O_RDONLY;
+            cmd[*cmd_size].fd[READ_END].name = lexer()->lexptr;
             break;
         case S_LTLT:
             // <<
@@ -95,34 +99,31 @@ Command **run_parse(char *inputBuffer, int *cmd_size) // char *args[], int *args
             break;
         case S_LTLTLT:
             // <<<
-            cmd[*cmd_size]->file_descriptor[0].fd = O_RDONLY;
-            cmd[*cmd_size]->file_descriptor[0].name = lexer()->lexptr;
+            cmd[*cmd_size].fd[READ_END].flag = O_RDONLY;
+            cmd[*cmd_size].fd[READ_END].name = lexer()->lexptr;
             /* TODO : string */
             break;
         case S_GT:
             // >
-            cmd[*cmd_size]->file_descriptor[1].fd = flags | O_EXCL;
-            cmd[*cmd_size]->file_descriptor[1].name = lexer()->lexptr;
+            cmd[*cmd_size].fd[WRITE_END].flag = flags | O_EXCL;
+            cmd[*cmd_size].fd[WRITE_END].name = lexer()->lexptr;
             break;
         case S_GTGT:
             // >>
-            cmd[*cmd_size]->file_descriptor[1].fd = flags | O_APPEND;
-            cmd[*cmd_size]->file_descriptor[1].name = lexer()->lexptr;
+            cmd[*cmd_size].fd[WRITE_END].flag = flags | O_APPEND;
+            cmd[*cmd_size].fd[WRITE_END].name = lexer()->lexptr;
             break;
         case S_GTBAR:
             // >|
-            cmd[*cmd_size]->file_descriptor[1].fd = flags | O_TRUNC;
-            cmd[*cmd_size]->file_descriptor[1].name = lexer()->lexptr;
+            cmd[*cmd_size].fd[WRITE_END].flag = flags | O_TRUNC;
+            cmd[*cmd_size].fd[WRITE_END].name = lexer()->lexptr;
             break;
         default:
-            args[args_size++] = token.lexptr; /* assign token to args */
+            args[argc++] = token.lexptr; /* assign token to args */
         }
 
         printf("\nf_ token : %s Type : %d Ptr: %p \n", token.lexptr, token.type, token.lexptr);
         token = *lexer();
         printf("s_ token : %s Type : %d Ptr: %p \n\n", token.lexptr, token.type, token.lexptr);
     }
-    // printf("token : %s Type : %d Ptr: %p \n", token.lexptr, token.type, token.lexptr);
-    // args[*args_size] = token.lexptr; /* assign token to args */
-    // (*args_size)++;
 }

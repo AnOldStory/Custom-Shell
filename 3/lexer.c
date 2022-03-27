@@ -26,7 +26,7 @@ int lextable_count = 0;
 
 Token *insert(char *s, int tok)
 {
-    printf("inserted : %s %d\n", s, tok);
+    // printf("inserted : %s %d\n", s, tok);
     state = Normal;
     int len = strlen(s);
     if (len >= STRMAX)
@@ -38,6 +38,7 @@ Token *insert(char *s, int tok)
         /* evoke error */
     }
     lextable[lextable_count].lexptr = save_string(s);
+    // (char *)malloc(1 + strlen(s))
     lextable[lextable_count].type = tok;
 
     return &lextable[lextable_count++];

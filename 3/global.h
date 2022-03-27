@@ -1,6 +1,8 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
+#pragma pack(8)
+
 #include <stdio.h>     /* standard input output */
 char *cuserid(char *); /* avoid compiler warning  */
 #include <ctype.h>     /* check input type - lexer */
@@ -53,6 +55,10 @@ int waitpid();         /* avoid compiler warning */
 // #define S_GTGTGT 261 /* >>> */
 #define S_GTBAR 262 /* >| */
 
+/* main.c */
+#define READ_END 0
+#define WRITE_END 1
+
 /* lexer.c */
 typedef struct TokenStruct
 {
@@ -63,15 +69,16 @@ typedef struct TokenStruct
 /* parser.c */
 typedef struct FileDescriptorStruct
 {
-    int fd;
     char *name;
+    int flag;
+    int fd;
 } FileDescriptor;
 
 typedef struct CommandStruct
 {
+    FileDescriptor *fd;
     char **argv;
     int argc;
-    FileDescriptor file_descriptor[2];
 } Command;
 
 /* string.c */
@@ -87,7 +94,7 @@ void error_msg(char *);
 void init_buffer(char *init_buffer);
 int get_buffer();
 void put_buffer();
-Command **run_parse(char *inputBuffer, int *cmd_size); // , char *args[], int *args_size
+void run_parse(char *inputBuffer, Command *cmd, int *cmd_size); // , char *args[], int *args_size
 
 // int redoLex(char lexbuf[], int token);
 // void skipLex(char lexbuf[]);

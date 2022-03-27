@@ -19,10 +19,6 @@ int main(int argc, char *argv[])
     size_t len = MAX_LINE;                                       /* length of line */
     char *inputBuffer = (char *)malloc(sizeof(char) * MAX_LINE); /* need free */
 
-    /* parsed info */
-    char *args[MAX_LINE / 2 + 1]; /* command line arguments */
-                                  /* arguments size */
-
     int should_run = 1; /* flag to determine when to exit program */
     while (should_run)  /* run until flag change */
     {
@@ -44,78 +40,98 @@ int main(int argc, char *argv[])
         };
 
         int cmd_count = 0;
-        Command **cmd = run_parse(inputBuffer, &cmd_count); // token = *lexer()
+        Command cmd[100];
+        run_parse(inputBuffer, &cmd, &cmd_count); // token = *lexer()
+                                                  // printf("cmd[*cmd_size].fd[1]%d\n", cmd[0].fd[1]);
 
-        printf(" 1: %p \n", cmd[0]->argv[0]);
-        printf(" 2: %p \n", cmd[0]->argv[1]);
-        printf(" 3: %p \n", cmd[0]->argv[2]);
-        // for (int i = 0; i < cmd[0]->argc + 1; i++)
+        // for (int i = 0; i < cmd[0].argc + 1; i++)
         // {
         //     for (int j = 0; j < 5; j++)
         //     {
-        //         printf("[%d,%d]%d \n", i, j, cmd[0]->argv[i][j]);
+        //         printf("[%d,%d]%d \n", i, j, cmd[0].argv[i][j]);
         //     }
         // }
 
-        pid_t parent_pid = fork();
-        if (parent_pid > 0)
+        for (int nth_cmd = 0; nth_cmd < cmd_count; nth_cmd++)
         {
-            /* parents */
-            wait();
-        }
-        else if (parent_pid == 0)
-        {
+            // printf(" %d_1: %p %s \n", nth_cmd, cmd[nth_cmd].argv[0], cmd[nth_cmd].argv[0]);
+            // printf(" %d_2: %p %s \n", nth_cmd, cmd[nth_cmd].argv[1], cmd[nth_cmd].argv[1]);
+            // printf(" %d_3: %p \n", nth_cmd, cmd[nth_cmd].argv[2]);
+            // printf("argc %d\n", cmd[nth_cmd].argc);
+            // printf("fd[0].flag %d\n", cmd[nth_cmd].fd[0].flag);
+            // printf("fd[1].flag %d\n", cmd[nth_cmd].fd[1].flag);
+            // printf("fd[0].name %s\n", cmd[nth_cmd].fd[0].name);
+            // printf("fd[1].name %s\n", cmd[nth_cmd].fd[1].name);
 
+            int fd[2]; // read , write
+            if (pipe(fd) < 0)
+            {
+                printf("wrong pipe");
+                // TODO:exception
+            }
+
+            cmd[nth_cmd].fd[READ_END].fd = fd[READ_END];
+            cmd[nth_cmd].fd[WRITE_END].fd = fd[WRITE_END];
+
+            /* CHILD */
+            /* handle stdin to file */
+            if (cmd[nth_cmd].fd[READ_END].name != NULL)
+            {
+                if ((cmd[nth_cmd].fd[READ_END].fd = open(cmd[nth_cmd].fd[READ_END].name,
+                                                         cmd[nth_cmd].fd[READ_END].flag)) < 0)
+                {
+                    printf("err in fd : %s", cmd[nth_cmd].fd[READ_END].name);
+                }
+                dup2(cmd[nth_cmd].fd[READ_END].fd, STDIN_FILENO);
+                close(cmd[nth_cmd].fd[READ_END].fd);
+            }
+            /* handle stdout to file*/
+            if (cmd[nth_cmd].fd[WRITE_END].name != NULL)
+            {
+                if ((cmd[nth_cmd].fd[WRITE_END].fd = open(cmd[nth_cmd].fd[WRITE_END].name,
+                                                          cmd[nth_cmd].fd[WRITE_END].flag,
+                                                          FILE_PERMISSION)) < 0)
+                {
+                    printf("err in fd : %s\n", cmd[nth_cmd].fd[WRITE_END].name);
+                }
+                dup2(cmd[nth_cmd].fd[WRITE_END].fd, STDOUT_FILENO);
+                close(cmd[nth_cmd].fd[WRITE_END].fd);
+            }
+
+            if (nth_cmd > 0)
+            {
+                close(cmd[nth_cmd].fd[READ_END].fd);
+                dup2(cmd[nth_cmd].fd[READ_END].fd, cmd[nth_cmd - 1].fd[WRITE_END].fd);
+                close(cmd[nth_cmd].fd[READ_END].fd);
+            }
+        }
+
+        pid_t pid = fork();
+        if (pid == 0)
+        {
             for (int nth_cmd = 0; nth_cmd < cmd_count; nth_cmd++)
             {
-                pid_t pid = fork();
-                if (pid == 0)
+                for (int i = 0; i < nth_cmd; i++)
                 {
-                    int fd_in, fd_out; // read , write
-
-                    /* handle stdin to file */
-                    if (cmd[nth_cmd]->file_descriptor[0].name != NULL)
-                    {
-                        if ((fd_in = open(cmd[nth_cmd]->file_descriptor[0].name, cmd[nth_cmd]->file_descriptor[0].fd)) < 0)
-                        {
-                            printf("err in fd : %s", cmd[nth_cmd]->file_descriptor[0].name);
-                        }
-                        dup2(fd_in, STDIN_FILENO);
-                        close(fd_in);
-                    }
-                    /* handle stdout to file*/
-                    if (cmd[nth_cmd]->file_descriptor[1].name != NULL)
-                    {
-                        if ((fd_out = open(cmd[nth_cmd]->file_descriptor[1].name, cmd[nth_cmd]->file_descriptor[1].fd, FILE_PERMISSION)) < 0)
-                        {
-                            printf("err in fd : %s\n", cmd[nth_cmd]->file_descriptor[1].name);
-                        }
-                        printf("name is %s , fd is %d \n", cmd[nth_cmd]->file_descriptor[1].name, cmd[nth_cmd]->file_descriptor[1].fd);
-                        printf("my fd %d\n", fd_out);
-                        dup2(fd_out, STDOUT_FILENO);
-                        close(fd_out);
-                    }
-
-                    // if (nth_cmd > 0)
-                    // {
-                    //     close(cmd[nth_cmd - 1]->file_descriptor[0].fd);
-                    //     dup2(fd_in, cmd[nth_cmd - 1]->file_descriptor[1].fd);
-                    //     close(fd_in);
-                    // }
-
-                    printf("실행한다잇\n");
-                    printf("hello %s \n", cmd[nth_cmd]->argv[0]);
-                    printf("hello 2 %s \n", cmd[nth_cmd]->argv[1]);
-                    if (execvp(cmd[nth_cmd]->argv[0], cmd[nth_cmd]->argv) < 0)
-                        exit(1);
+                    close(cmd[nth_cmd].fd[READ_END].fd);
+                    close(cmd[nth_cmd].fd[WRITE_END].fd);
                 }
-                waitpid(pid, NULL, 0);
+                if (execvp(cmd[nth_cmd].argv[0], cmd[nth_cmd].argv) < 0)
+                {
+                    exit(1);
+                }
             }
+        }
+        else if (pid > 0)
+        {
+            /* parent */
+            waitpid(pid, NULL, 0);
         }
         else
         {
-            printf("fork error");
+            printf("fork err");
         }
+
         free_all();
     }
     free(inputBuffer);

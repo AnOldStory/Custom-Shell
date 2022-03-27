@@ -2,18 +2,26 @@
     "configurations": [
         {
             "name": "Win32",
+            "compilerPath": "C:/MinGW/bin/g++.exe",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/3/**",
+                "${workspaceRoot}"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "windowsSdkVersion": "10.0.19041.0",
-            "compilerPath": "C:/MinGW/bin/g++.exe",
+            "browse": {
+                "path": [
+                    "C:/MinGW/include/*",
+                    "${workspaceRoot}"
+                ],
+            },
             "cStandard": "c17",
-            "cppStandard": "c++17"
+            "cppStandard": "c++17",
+            // "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4
