@@ -18,11 +18,16 @@ enum STATUS
 enum STATUS state = Normal; /* state manager */
 
 /* table of token */
-#define SYMMAX 100 /* symtable size */
+#define SYMMAX 999 /* symtable size */
 #define STRMAX 999 /* array lexemes size */
 
 Token lextable[SYMMAX];
 int lextable_count = 0;
+
+void init()
+{
+    lextable_count = 0;
+}
 
 Token *insert(char *s, int tok)
 {
@@ -31,10 +36,12 @@ Token *insert(char *s, int tok)
     int len = strlen(s);
     if (len >= STRMAX)
     {
+        printf("over STRMAX");
         /* evoke error */
     }
     if (lextable_count + 1 >= SYMMAX)
     {
+        printf("over lextable_count");
         /* evoke error */
     }
     lextable[lextable_count].lexptr = save_string(s);
@@ -96,14 +103,14 @@ Token *lexer()
 
             default:
                 put_buffer();
-                if (isdigit(token))
-                { /* File Discriptor left value */
-                    state = isDig;
-                }
-                else
-                {
-                    state = isCmd;
-                }
+                // if (isdigit(token))
+                // { /* File Discriptor left value */
+                //     state = isDig;
+                // }
+                // else
+                // {
+                state = isCmd;
+                // }
                 continue;
             }
         case isDig:
@@ -121,7 +128,7 @@ Token *lexer()
             {
             case S_SQU:
                 lexbuf[buf] = '\0';
-                return insert(save_string(lexbuf), S_STR); // string
+                return insert(lexbuf, S_STR); // string
             default:
                 lexbuf[buf++] = token; // string
                 continue;
@@ -131,7 +138,7 @@ Token *lexer()
             {
             case S_DQU:
                 lexbuf[buf] = '\0';
-                return insert(save_string(lexbuf), S_STR); // string
+                return insert(lexbuf, S_STR); // string
             default:
                 lexbuf[buf++] = token; // string
                 continue;
@@ -196,7 +203,7 @@ Token *lexer()
         case isCmd:
             switch (token)
             {
-            case S_SEMI:
+            // case S_SEMI:
             case S_AMP:
             case S_BAR:
             case S_LT:

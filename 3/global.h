@@ -1,7 +1,7 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 
-#pragma pack(8)
+// #pragma pack(8)
 
 #include <stdio.h>     /* standard input output */
 char *cuserid(char *); /* avoid compiler warning  */
@@ -10,8 +10,9 @@ char *cuserid(char *); /* avoid compiler warning  */
 #include <stdlib.h>    /* exit - error, main */
 #include <string.h>    /* strlen - symbol */
 #include <unistd.h>    /* symbol constant */
-int waitpid();         /* avoid compiler warning */
-#include <errno.h>     /* print error */
+// #include <sys/wait.h>  /* wait pid  exit code */
+int waitpid();     /* avoid compiler warning */
+#include <errno.h> /* print error */
 
 #define MAX_LINE 80      /* The maximum length command */
 #define MAX_HOSTNAME 256 /* maximum length hostname */
@@ -37,11 +38,11 @@ int waitpid();         /* avoid compiler warning */
 #define S_NUM 991  /* number */
 
 /* lexer string */
-#define S_SQU 33     /* ' */
 #define S_DQU 34     /* " */
 #define S_HASH 35    /* # */
 #define S_DOL 36     /* $ */
 #define S_AMP 38     /* & */
+#define S_SQU 39     /* ' */
 #define S_SEMI 59    /* ; */
 #define S_LT 60      /* < */
 #define S_GT 62      /* > */
@@ -76,9 +77,10 @@ typedef struct FileDescriptorStruct
 
 typedef struct CommandStruct
 {
-    FileDescriptor *fd;
+    FileDescriptor *fd_info;
     char **argv;
     int argc;
+    int is_back;
 } Command;
 
 /* string.c */
@@ -96,11 +98,8 @@ int get_buffer();
 void put_buffer();
 void run_parse(char *inputBuffer, Command *cmd, int *cmd_size); // , char *args[], int *args_size
 
-// int redoLex(char lexbuf[], int token);
-// void skipLex(char lexbuf[]);
-// void undoLex(char lexbuf[]);
-
 /* lexer.c */
+void init();
 Token *lexer();
 Token *insert(char s[], int tok);
 
@@ -108,4 +107,20 @@ Token *insert(char s[], int tok);
 char *get_username();
 char *get_hostname();
 char *get_cwd();
+
+/* built_in_commands */
+int check_cmd(char *args[], int args_size);
+
+/* linked_list.c */
+typedef struct NodeStruct
+{
+    struct Node *next;
+    int index;
+    pid_t pid;
+} Node;
+
+Node *link_add(Node *previous, int index, int pid);
+
+void link_remove(Node *previous);
+
 #endif

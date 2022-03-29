@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -g -O2
 TARGET = main
-OBJECTS	= error.o string.o init.o lexer.o parser.o
+OBJECTS	= error.o string.o init.o lexer.o parser.o built_in_command.o linked_list.o
 MAIN_SOURCE	= main.c
 
 .SUFFIEXES: .c .o

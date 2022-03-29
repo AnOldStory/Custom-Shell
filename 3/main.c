@@ -15,6 +15,11 @@ void free_all()
 
 int main(int argc, char *argv[])
 {
+    Node *head = malloc(sizeof(Node));
+    Node *tail = head;
+    int pid_size;
+    int exitcode;
+
     /* input */
     size_t len = MAX_LINE;                                       /* length of line */
     char *inputBuffer = (char *)malloc(sizeof(char) * MAX_LINE); /* need free */
@@ -29,6 +34,7 @@ int main(int argc, char *argv[])
         current_hostname = get_hostname();
         current_working_directory = get_cwd();
         fflush(stdout);
+
         int args_size = 0;
 
         printf("%s@%s:~%s$ ", current_username, current_hostname, current_working_directory); /* print username */
@@ -40,17 +46,10 @@ int main(int argc, char *argv[])
         };
 
         int cmd_count = 0;
-        Command cmd[100];
-        run_parse(inputBuffer, &cmd, &cmd_count); // token = *lexer()
-                                                  // printf("cmd[*cmd_size].fd[1]%d\n", cmd[0].fd[1]);
 
-        // for (int i = 0; i < cmd[0].argc + 1; i++)
-        // {
-        //     for (int j = 0; j < 5; j++)
-        //     {
-        //         printf("[%d,%d]%d \n", i, j, cmd[0].argv[i][j]);
-        //     }
-        // }
+        Command cmd[100];
+
+        run_parse(inputBuffer, &cmd, &cmd_count);
 
         for (int nth_cmd = 0; nth_cmd < cmd_count; nth_cmd++)
         {
@@ -58,82 +57,130 @@ int main(int argc, char *argv[])
             // printf(" %d_2: %p %s \n", nth_cmd, cmd[nth_cmd].argv[1], cmd[nth_cmd].argv[1]);
             // printf(" %d_3: %p \n", nth_cmd, cmd[nth_cmd].argv[2]);
             // printf("argc %d\n", cmd[nth_cmd].argc);
-            // printf("fd[0].flag %d\n", cmd[nth_cmd].fd[0].flag);
-            // printf("fd[1].flag %d\n", cmd[nth_cmd].fd[1].flag);
-            // printf("fd[0].name %s\n", cmd[nth_cmd].fd[0].name);
-            // printf("fd[1].name %s\n", cmd[nth_cmd].fd[1].name);
+            // printf("fd_info[0].flag %d\n", cmd[nth_cmd].fd_info[0].flag);
+            // printf("fd_info[1].flag %d\n", cmd[nth_cmd].fd_info[1].flag);
+            // printf("fd_info[0].name %s\n", cmd[nth_cmd].fd_info[0].name);
+            // printf("fd_info[1].name %s\n", cmd[nth_cmd].fd_info[1].name);
 
             int fd[2]; // read , write
             if (pipe(fd) < 0)
             {
                 printf("wrong pipe");
                 // TODO:exception
+                exit(1);
             }
 
-            cmd[nth_cmd].fd[READ_END].fd = fd[READ_END];
-            cmd[nth_cmd].fd[WRITE_END].fd = fd[WRITE_END];
+            cmd[nth_cmd].fd_info[READ_END].fd = fd[READ_END];
+            cmd[nth_cmd].fd_info[WRITE_END].fd = fd[WRITE_END];
 
-            /* CHILD */
-            /* handle stdin to file */
-            if (cmd[nth_cmd].fd[READ_END].name != NULL)
+            pid_t pid = fork();
+            if (pid == 0)
             {
-                if ((cmd[nth_cmd].fd[READ_END].fd = open(cmd[nth_cmd].fd[READ_END].name,
-                                                         cmd[nth_cmd].fd[READ_END].flag)) < 0)
+                /* CHILD */
+
+                /* pipe in handle */
+                if (nth_cmd > 0)
                 {
-                    printf("err in fd : %s", cmd[nth_cmd].fd[READ_END].name);
+                    dup2(cmd[nth_cmd - 1].fd_info[READ_END].fd, STDIN_FILENO);
+                    close(cmd[nth_cmd - 1].fd_info[READ_END].fd);
+                    close(cmd[nth_cmd - 1].fd_info[WRITE_END].fd);
                 }
-                dup2(cmd[nth_cmd].fd[READ_END].fd, STDIN_FILENO);
-                close(cmd[nth_cmd].fd[READ_END].fd);
-            }
-            /* handle stdout to file*/
-            if (cmd[nth_cmd].fd[WRITE_END].name != NULL)
-            {
-                if ((cmd[nth_cmd].fd[WRITE_END].fd = open(cmd[nth_cmd].fd[WRITE_END].name,
-                                                          cmd[nth_cmd].fd[WRITE_END].flag,
-                                                          FILE_PERMISSION)) < 0)
-                {
-                    printf("err in fd : %s\n", cmd[nth_cmd].fd[WRITE_END].name);
-                }
-                dup2(cmd[nth_cmd].fd[WRITE_END].fd, STDOUT_FILENO);
-                close(cmd[nth_cmd].fd[WRITE_END].fd);
-            }
 
-            if (nth_cmd > 0)
+                /* handle stdin to file */
+                if (cmd[nth_cmd].fd_info[READ_END].name != NULL)
+                {
+                    if ((cmd[nth_cmd].fd_info[READ_END].fd = open(cmd[nth_cmd].fd_info[READ_END].name,
+                                                                  cmd[nth_cmd].fd_info[READ_END].flag)) < 0)
+                    {
+                        printf("err in fd : %s", cmd[nth_cmd].fd_info[READ_END].name);
+                    }
+                    dup2(cmd[nth_cmd].fd_info[READ_END].fd, STDIN_FILENO);
+                    close(cmd[nth_cmd].fd_info[READ_END].fd);
+                }
+                /* handle stdout to file*/
+                if (cmd[nth_cmd].fd_info[WRITE_END].name != NULL)
+                {
+                    if ((cmd[nth_cmd].fd_info[WRITE_END].fd = open(cmd[nth_cmd].fd_info[WRITE_END].name,
+                                                                   cmd[nth_cmd].fd_info[WRITE_END].flag,
+                                                                   FILE_PERMISSION)) < 0)
+                    {
+                        printf("err in fd : %s\n", cmd[nth_cmd].fd_info[WRITE_END].name);
+                    }
+                    dup2(cmd[nth_cmd].fd_info[WRITE_END].fd, STDOUT_FILENO);
+                    close(cmd[nth_cmd].fd_info[WRITE_END].fd);
+                }
+
+                /* pipe out handle */
+                if (nth_cmd < (cmd_count - 1))
+                {
+                    dup2(cmd[nth_cmd].fd_info[WRITE_END].fd, STDOUT_FILENO);
+                    close(cmd[nth_cmd].fd_info[WRITE_END].fd);
+                    close(cmd[nth_cmd].fd_info[READ_END].fd);
+                }
+
+                if (!check_cmd(cmd[nth_cmd].argv, cmd[nth_cmd].argc))
+                {
+                    if (execvp(cmd[nth_cmd].argv[0], cmd[nth_cmd].argv) < 0)
+                    {
+                        handleErr();
+                        exit(1);
+                    }
+                }
+            }
+            else if (pid > 0)
             {
-                close(cmd[nth_cmd].fd[READ_END].fd);
-                dup2(cmd[nth_cmd].fd[READ_END].fd, cmd[nth_cmd - 1].fd[WRITE_END].fd);
-                close(cmd[nth_cmd].fd[READ_END].fd);
+                /* parent */
+                if (nth_cmd > 0)
+                {
+                    close(cmd[nth_cmd - 1].fd_info[READ_END].fd);
+                    close(cmd[nth_cmd - 1].fd_info[WRITE_END].fd);
+                }
+
+                if (cmd[nth_cmd].is_back == 1)
+                {
+                    printf("[%d] %d\n", nth_cmd, pid);
+                    waitpid(pid, &exitcode, 0x00000001); // WNOHANG for window
+                    tail = link_add(tail, pid_size++, pid);
+                }
+                else
+                {
+                    waitpid(pid, &exitcode, 0);
+                }
+            }
+            else
+            {
+                printf("fork err");
             }
         }
-
-        pid_t pid = fork();
-        if (pid == 0)
+        // sleep 1s &
+        /* swap zombie process */
+        Node *selected_pid = head;
+        Node *previous = head;
+        while (selected_pid->next != NULL)
         {
-            for (int nth_cmd = 0; nth_cmd < cmd_count; nth_cmd++)
+            selected_pid = selected_pid->next;
+            if (waitpid(selected_pid->pid, &exitcode, 0x00000001) > 0)
             {
-                for (int i = 0; i < nth_cmd; i++)
+                if (WIFEXITED(exitcode))
                 {
-                    close(cmd[nth_cmd].fd[READ_END].fd);
-                    close(cmd[nth_cmd].fd[WRITE_END].fd);
-                }
-                if (execvp(cmd[nth_cmd].argv[0], cmd[nth_cmd].argv) < 0)
-                {
-                    exit(1);
+                    printf("[%d] Done pid : %d with status %d\n", selected_pid->index, selected_pid->pid, WEXITSTATUS(exitcode));
+                    if (selected_pid->next == NULL)
+                    {
+                        tail = previous;
+                    }
+                    link_remove(previous);
+                    selected_pid = previous;
                 }
             }
+            previous = selected_pid;
         }
-        else if (pid > 0)
+        if (head->next == NULL)
         {
-            /* parent */
-            waitpid(pid, NULL, 0);
+            pid_size = 0;
         }
-        else
-        {
-            printf("fork err");
-        }
-
         free_all();
     }
+
     free(inputBuffer);
-    return 0;
+    return exitcode;
 }

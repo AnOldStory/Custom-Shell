@@ -20,15 +20,17 @@ int check_cmd(char *args[], int args_size)
             /* cd */
             if (args_size == 1)
             {
-                run_i(chdir(getenv("HOME")));
+                if (chdir(getenv("HOME")) < 0)
+                    printf("err");
             }
             else if (args_size == 2)
             {
-                run_i(chdir(args[1]));
+                if (chdir(args[1]) < 0)
+                    printf("err2");
             }
             else
             {
-                error_c("too many arguments");
+                handleErr_msg("too many arguments");
             }
         }
         else
