@@ -28,10 +28,13 @@ void run_parse(char *inputBuffer, Command *cmd, int *cmd_size) // char *args[], 
         switch (token.type)
         {
         case S_DONE:
-            args[argc] = NULL;
-            cmd[*cmd_size].argv = args;
-            cmd[*cmd_size].argc = argc;
-            (*cmd_size)++;
+            if (argc > 0)
+            {
+                args[argc] = NULL;
+                cmd[*cmd_size].argv = args;
+                cmd[*cmd_size].argc = argc;
+                (*cmd_size)++;
+            }
             return;
         /* | */
         case S_BAR:
@@ -79,7 +82,6 @@ void run_parse(char *inputBuffer, Command *cmd, int *cmd_size) // char *args[], 
             cmd[*cmd_size].fd_info[WRITE_END].name = NULL;
 
             cmd[*cmd_size].is_back = 0;
-            /* TODO: background */
             break;
         /* handle redirection */
         case S_LT:
