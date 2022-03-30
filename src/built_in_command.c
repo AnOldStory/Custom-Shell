@@ -11,7 +11,7 @@ int check_cmd(char *args[], int args_size)
         {
             /* Quit program */
             flag = 1;
-            exit(0);
+            exit(127);
         }
         else if (strcmp(args[0], "cd") == 0)
         {

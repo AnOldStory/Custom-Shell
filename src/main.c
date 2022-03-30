@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
     init_manager(); /* initial process manager for kill zombie process*/
 
-    while (true)
+    while (1)
     {
         /**
          * initialize
@@ -134,6 +134,11 @@ int main(int argc, char *argv[])
                 else
                 {
                     waitpid(pid, &exitcode, 0);
+                    if (exitcode == 32512)
+                    {
+                        /* exit command */
+                        exit(127);
+                    }
                 }
             }
             else
