@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -g -O2 -w
-TARGET = main
+TARGET = osh
 OBJECTS	= error.o string.o init.o lexer.o parser.o built_in_command.o linked_list.o process_manager.o
-MAIN_SOURCE	= main.c
+MAIN_SOURCE	= osh.c
 
 .SUFFIEXES: .c .o
 
