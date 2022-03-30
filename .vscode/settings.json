@@ -18,8 +18,8 @@
     "built_in_command.h": "c"
   },
   "code-runner.executorMap": {
-    "c": "cd $dir && make clean && make && ./main && make clean",
-    "h": "cd $dir && make clean && make && ./main && make clean"
+    "c": "cd $dir && make clean && make && ./osh && make clean",
+    "h": "cd $dir && make clean && make && ./osh && make clean"
   },
   "code-runner.clearPreviousOutput": false,
   // "code-runner.preserveFocus": true,

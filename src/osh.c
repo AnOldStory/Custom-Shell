@@ -1,4 +1,4 @@
-#include "main.h"
+#include "osh.h"
 
 #define FILE_PERMISSION 0644
 
