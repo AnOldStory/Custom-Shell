@@ -1,5 +1,6 @@
 #include "init.h"
 
+/* get username of shell */
 char *get_username()
 {
     char *username = getlogin();
@@ -7,6 +8,7 @@ char *get_username()
     return save_string(username);
 }
 
+/* get hostname of shell */
 char *get_hostname()
 {
     char hostname[MAX_HOSTNAME];
@@ -15,6 +17,7 @@ char *get_hostname()
     return save_string(hostname);
 }
 
+/* get current working directory of shell */
 char *get_cwd()
 {
     char cwd[MAX_CWD];

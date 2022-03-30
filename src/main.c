@@ -16,16 +16,15 @@ void free_all()
 int main(int argc, char *argv[])
 {
 
-    int exitcode;
-
     /* input */
     size_t len = MAX_LINE;                                       /* length of line */
     char *inputBuffer = (char *)malloc(sizeof(char) * MAX_LINE); /* need free */
 
-    init_manager();
+    int exitcode;
 
-    int should_run = 1; /* flag to determine when to exit program */
-    while (should_run)  /* run until flag change */
+    init_manager(); /* initial process manager for kill zombie process*/
+
+    while (true)
     {
         /**
          * initialize
@@ -35,8 +34,6 @@ int main(int argc, char *argv[])
         current_working_directory = get_cwd();
         fflush(stdout);
 
-        int args_size = 0;
-
         printf("%s@%s:~%s$ ", current_username, current_hostname, current_working_directory); /* print username */
 
         /* PARSER */
@@ -45,28 +42,18 @@ int main(int argc, char *argv[])
             printf("err");
         };
 
+        Command cmd[100];
         int cmd_count = 0;
 
-        Command cmd[100];
-
-        run_parse(inputBuffer, &cmd, &cmd_count);
+        run_parse(inputBuffer, &cmd, &cmd_count); /* parse input and put them cmd */
 
         for (int nth_cmd = 0; nth_cmd < cmd_count; nth_cmd++)
         {
-            // printf(" %d_1: %p %s \n", nth_cmd, cmd[nth_cmd].argv[0], cmd[nth_cmd].argv[0]);
-            // printf(" %d_2: %p %s \n", nth_cmd, cmd[nth_cmd].argv[1], cmd[nth_cmd].argv[1]);
-            // printf(" %d_3: %p \n", nth_cmd, cmd[nth_cmd].argv[2]);
-            // printf("argc %d\n", cmd[nth_cmd].argc);
-            // printf("fd_info[0].flag %d\n", cmd[nth_cmd].fd_info[0].flag);
-            // printf("fd_info[1].flag %d\n", cmd[nth_cmd].fd_info[1].flag);
-            // printf("fd_info[0].name %s\n", cmd[nth_cmd].fd_info[0].name);
-            // printf("fd_info[1].name %s\n", cmd[nth_cmd].fd_info[1].name);
-
             int fd[2]; // read , write
+
             if (pipe(fd) < 0)
             {
-                printf("wrong pipe");
-                // TODO:exception
+                error_msg("wrong in pipe ");
                 exit(1);
             }
 
@@ -76,9 +63,9 @@ int main(int argc, char *argv[])
             pid_t pid = fork();
             if (pid == 0)
             {
-                /* CHILD */
+                /* if this process is CHILD */
 
-                /* pipe in handle */
+                /* handle stdin with pipe */
                 if (nth_cmd > 0)
                 {
                     dup2(cmd[nth_cmd - 1].fd_info[READ_END].fd, STDIN_FILENO);
@@ -86,7 +73,7 @@ int main(int argc, char *argv[])
                     close(cmd[nth_cmd - 1].fd_info[WRITE_END].fd);
                 }
 
-                /* handle stdin to file */
+                /* handle stdin with file */
                 if (cmd[nth_cmd].fd_info[READ_END].name != NULL)
                 {
                     if ((cmd[nth_cmd].fd_info[READ_END].fd = open(cmd[nth_cmd].fd_info[READ_END].name,
@@ -97,7 +84,7 @@ int main(int argc, char *argv[])
                     dup2(cmd[nth_cmd].fd_info[READ_END].fd, STDIN_FILENO);
                     close(cmd[nth_cmd].fd_info[READ_END].fd);
                 }
-                /* handle stdout to file*/
+                /* handle stdout with file*/
                 if (cmd[nth_cmd].fd_info[WRITE_END].name != NULL)
                 {
                     if ((cmd[nth_cmd].fd_info[WRITE_END].fd = open(cmd[nth_cmd].fd_info[WRITE_END].name,
@@ -110,7 +97,7 @@ int main(int argc, char *argv[])
                     close(cmd[nth_cmd].fd_info[WRITE_END].fd);
                 }
 
-                /* pipe out handle */
+                /* handle stdout with pipe */
                 if (nth_cmd < (cmd_count - 1))
                 {
                     dup2(cmd[nth_cmd].fd_info[WRITE_END].fd, STDOUT_FILENO);
@@ -118,6 +105,7 @@ int main(int argc, char *argv[])
                     close(cmd[nth_cmd].fd_info[READ_END].fd);
                 }
 
+                /* check id it built in command */
                 if (!check_cmd(cmd[nth_cmd].argv, cmd[nth_cmd].argc))
                 {
                     if (execvp(cmd[nth_cmd].argv[0], cmd[nth_cmd].argv) < 0)
@@ -129,13 +117,15 @@ int main(int argc, char *argv[])
             }
             else if (pid > 0)
             {
-                /* parent */
+                /* if this process is PARENT */
+                /* close pipe */
                 if (nth_cmd > 0)
                 {
                     close(cmd[nth_cmd - 1].fd_info[READ_END].fd);
                     close(cmd[nth_cmd - 1].fd_info[WRITE_END].fd);
                 }
 
+                /* check background and make it manage */
                 if (cmd[nth_cmd].is_back == 1)
                 {
                     printf("[%d] %d\n", nth_cmd, pid);

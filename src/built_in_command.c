@@ -9,14 +9,14 @@ int check_cmd(char *args[], int args_size)
     {
         if (strcmp(args[0], "exit") == 0)
         {
+            /* Quit program */
             flag = 1;
-            /* exit */
             exit(0);
         }
         else if (strcmp(args[0], "cd") == 0)
         {
+            /* Move directory with path */
             flag = 1;
-            /* cd */
             if (args_size == 1)
             {
                 if (chdir(getenv("HOME")) < 0)

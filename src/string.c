@@ -6,10 +6,9 @@
 
 char *save_string(char *s)
 {
-    // return strcpy((char *)malloc(1 + strlen(s)), s);
-    // if (strdup(s) == NULL)
-    // {
-    //     handleErr_msg("cant alloc -> saveString");
-    // }
+    /**
+     *  return string with malloc
+     *  same as strcpy((char *)malloc(1 + strlen(s)), s);
+     */
     return strdup(s);
 }
