@@ -17,7 +17,6 @@ void push_process_manager(int pid)
 
 void auto_process_manager()
 {
-    printf("pid %d \n", pid_size);
     int exitcode;
     /* swap zombie process */
     Node *selected_pid = head;

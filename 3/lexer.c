@@ -152,7 +152,7 @@ Token *lexer()
             case S_AMP:
                 return insert("&&", S_AND);
             default:
-                put_buffer(token);
+                put_buffer();
                 return insert("&", S_AMP);
             }
         case isBar:
@@ -161,7 +161,7 @@ Token *lexer()
             case S_BAR:
                 return insert("||", S_OR);
             default:
-                put_buffer(token);
+                put_buffer();
                 return insert("|", S_BAR);
             }
         case isLT:
@@ -179,27 +179,27 @@ Token *lexer()
             case S_LT:
                 return insert("<<<", S_LTLTLT);
             default:
-                put_buffer(token);
+                put_buffer();
                 return insert("<<", S_LTLT);
             }
         case isGT:
             switch (token)
             {
             case S_BAR:
-                put_buffer(token);
+                put_buffer();
                 return insert(">|", S_GTBAR);
             case S_GT:
-                put_buffer(token);
+                put_buffer();
                 return insert(">>", S_GTGT);
             default:
-                put_buffer(token);
+                put_buffer();
                 return insert(">", S_GT);
             }
         case isHash:
             switch (token)
             {
             case '\n':
-                put_buffer(token);
+                put_buffer();
             default:
                 continue;
             }
@@ -214,7 +214,7 @@ Token *lexer()
             case '\n':
             case ' ':
             case '\t':
-                put_buffer(token);
+                put_buffer();
                 lexbuf[buf] = '\0';
                 return insert(lexbuf, S_STR); // string
             default:

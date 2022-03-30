@@ -3,9 +3,7 @@
 char *get_username()
 {
     char *username = getlogin();
-    printf("%s", username);
     struct passwd *user_pw;
-    user_pw = getpwnam(username);
     return save_string(username);
 }
 

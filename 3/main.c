@@ -122,7 +122,6 @@ int main(int argc, char *argv[])
                 {
                     if (execvp(cmd[nth_cmd].argv[0], cmd[nth_cmd].argv) < 0)
                     {
-                        printf("실행오류");
                         handleErr();
                         exit(1);
                     }
