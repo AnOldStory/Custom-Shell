@@ -9,6 +9,13 @@
     "stdio.h": "c",
     "ctype.h": "c",
     "stdlib.h": "c",
+    "init.h": "c",
+    "lexer.h": "c",
+    "linked_list.h": "c",
+    "main.h": "c",
+    "parser.h": "c",
+    "process_manager.h": "c",
+    "built_in_command.h": "c"
   },
   "code-runner.executorMap": {
     "c": "cd $dir && make clean && make && ./main && make clean",

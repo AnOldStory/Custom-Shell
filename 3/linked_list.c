@@ -1,13 +1,13 @@
-#include "global.h"
+#include "linked_list.h"
 
 Node *link_add(Node *previous, int index, int pid)
 {
-    Node *newNode = malloc(sizeof(Node));
+    Node *newNode = (Node *)malloc(sizeof(Node));
 
     previous->next = newNode;
     newNode->index = index;
     newNode->pid = pid;
-    newNode->next = NULL;
+    newNode->next = 0;
 
     return newNode;
 }

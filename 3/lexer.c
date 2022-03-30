@@ -1,9 +1,33 @@
-#include "global.h"
+#include "lexer.h"
+int buffer_cursor;
+int buffer_size;
+char *buffer;
+
+/* handle input like buffer */
+void init_buffer(char *init_buffer)
+{
+    buffer_cursor = 0;
+    buffer_size = strlen(init_buffer);
+    buffer = init_buffer;
+}
+
+int get_buffer()
+{
+    if (buffer_cursor < buffer_size)
+        return buffer[buffer_cursor++];
+    else
+        return EOF;
+}
+
+void put_buffer()
+{
+    if (buffer_cursor > 0)
+        buffer_cursor--;
+}
 
 enum STATUS
 {
     Normal,
-    isDig,
     isSQU,
     isDQU,
     isCmd,
@@ -17,14 +41,10 @@ enum STATUS
 
 enum STATUS state = Normal; /* state manager */
 
-/* table of token */
-#define SYMMAX 999 /* symtable size */
-#define STRMAX 999 /* array lexemes size */
-
 Token lextable[SYMMAX];
 int lextable_count = 0;
 
-void init()
+void init_lexer()
 {
     lextable_count = 0;
 }
@@ -36,12 +56,12 @@ Token *insert(char *s, int tok)
     int len = strlen(s);
     if (len >= STRMAX)
     {
-        printf("over STRMAX");
+        error_msg("over STRMAX");
         /* evoke error */
     }
     if (lextable_count + 1 >= SYMMAX)
     {
-        printf("over lextable_count");
+        error_msg("over lextable_count");
         /* evoke error */
     }
     lextable[lextable_count].lexptr = save_string(s);
@@ -103,24 +123,7 @@ Token *lexer()
 
             default:
                 put_buffer();
-                // if (isdigit(token))
-                // { /* File Discriptor left value */
-                //     state = isDig;
-                // }
-                // else
-                // {
                 state = isCmd;
-                // }
-                continue;
-            }
-        case isDig:
-            if (isdigit(token))
-            {
-                return insert(lexbuf, S_NUM);
-            }
-            else
-            {
-                lexbuf[buf++] = token;
                 continue;
             }
         case isSQU:

@@ -1,4 +1,4 @@
-#include "global.h"
+#include "main.h"
 
 #define FILE_PERMISSION 0644
 
@@ -15,14 +15,14 @@ void free_all()
 
 int main(int argc, char *argv[])
 {
-    Node *head = malloc(sizeof(Node));
-    Node *tail = head;
-    int pid_size;
+
     int exitcode;
 
     /* input */
     size_t len = MAX_LINE;                                       /* length of line */
     char *inputBuffer = (char *)malloc(sizeof(char) * MAX_LINE); /* need free */
+
+    init_manager();
 
     int should_run = 1; /* flag to determine when to exit program */
     while (should_run)  /* run until flag change */
@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
                 {
                     if (execvp(cmd[nth_cmd].argv[0], cmd[nth_cmd].argv) < 0)
                     {
+                        printf("실행오류");
                         handleErr();
                         exit(1);
                     }
@@ -139,8 +140,7 @@ int main(int argc, char *argv[])
                 if (cmd[nth_cmd].is_back == 1)
                 {
                     printf("[%d] %d\n", nth_cmd, pid);
-                    waitpid(pid, &exitcode, 0x00000001); // WNOHANG for window
-                    tail = link_add(tail, pid_size++, pid);
+                    push_process_manager(pid);
                 }
                 else
                 {
@@ -152,32 +152,8 @@ int main(int argc, char *argv[])
                 printf("fork err");
             }
         }
-        // sleep 1s &
-        /* swap zombie process */
-        Node *selected_pid = head;
-        Node *previous = head;
-        while (selected_pid->next != NULL)
-        {
-            selected_pid = selected_pid->next;
-            if (waitpid(selected_pid->pid, &exitcode, 0x00000001) > 0)
-            {
-                if (WIFEXITED(exitcode))
-                {
-                    printf("[%d] Done pid : %d with status %d\n", selected_pid->index, selected_pid->pid, WEXITSTATUS(exitcode));
-                    if (selected_pid->next == NULL)
-                    {
-                        tail = previous;
-                    }
-                    link_remove(previous);
-                    selected_pid = previous;
-                }
-            }
-            previous = selected_pid;
-        }
-        if (head->next == NULL)
-        {
-            pid_size = 0;
-        }
+
+        auto_process_manager();
         free_all();
     }
 

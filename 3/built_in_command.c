@@ -1,4 +1,4 @@
-#include "global.h"
+#include "built_in_command.h"
 
 /* Special Commnads */
 int check_cmd(char *args[], int args_size)
@@ -11,7 +11,6 @@ int check_cmd(char *args[], int args_size)
         {
             flag = 1;
             /* exit */
-            free_all();
             exit(0);
         }
         else if (strcmp(args[0], "cd") == 0)

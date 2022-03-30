@@ -1,35 +1,9 @@
-#include "./global.h"
-
-int buffer_cursor;
-int buffer_size;
-char *buffer;
-
-/* handle input like buffer */
-void init_buffer(char *init_buffer)
-{
-    buffer_cursor = 0;
-    buffer_size = strlen(init_buffer);
-    buffer = init_buffer;
-}
-
-int get_buffer()
-{
-    if (buffer_cursor < buffer_size)
-        return buffer[buffer_cursor++];
-    else
-        return EOF;
-}
-
-void put_buffer()
-{
-    if (buffer_cursor > 0)
-        buffer_cursor--;
-}
+#include "./parser.h"
 
 void run_parse(char *inputBuffer, Command *cmd, int *cmd_size) // char *args[], int *args_size
 {
     init_buffer(inputBuffer);
-    init();
+    init_lexer();
 
     /* init parse */
     int flags = O_CREAT | O_WRONLY;
